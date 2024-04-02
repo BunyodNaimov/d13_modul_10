@@ -30,6 +30,9 @@ db_cursor.execute("""
     VALUES('Bunyod', 'Naimov')
 """)
 
+db_cursor.execute("SELECT * FROM users")
+
+
 db_connect.commit()
 
 db_connect.close()
