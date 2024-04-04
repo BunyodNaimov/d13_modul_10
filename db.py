@@ -106,5 +106,4 @@ def get_all_products():
     products = db_cursor.execute("""
         SELECT * FROM product
     """).fetchall()
-    db_cursor.close()
     return products
