@@ -1,16 +1,44 @@
 import sqlite3
 
-db_connect = sqlite3.connect("d13.sqlite3")
+db_connect = sqlite3.connect('d13.sqlite3')
 
 db_cursor = db_connect.cursor()
 
 
-def create_table_users():
+def create_users():
     db_cursor.execute("""
-        CREATE TABLE IF NOT EXISTS users(
-        id INTEGER PRIMARY KEY,
-        first_name TEXT,
-        last_name TEXT)
+        CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, first_name TEXT, last_name TEXT)
+    """)
+    db_connect.commit()
+
+
+def insert_users():
+    db_cursor.execute("""
+        INSERT INTO users(last_name, first_name) VALUES ('Jon', 'Doe')
+    """)
+    db_connect.commit()
+
+
+def delete_users():
+    db_cursor.execute("""
+        DELETE FROM users WHERE  id=1
+    """)
+    db_connect.commit()
+
+
+def update_users():
+    db_cursor.execute("""
+        UPDATE users SET last_name='DOE', first_name='JON' WHERE id=2
+    """)
+    db_connect.commit()
+
+
+update_users()
+
+
+def drop_users():
+    db_cursor.execute("""
+        DROP TABLE users
     """)
 
 
@@ -19,7 +47,8 @@ def create_table_product():
         CREATE TABLE IF NOT EXISTS product(
         id INTEGER PRIMARY KEY,
         title TEXT,
-        price REAL)
+        price REAL,
+        photo TEXT)
     """)
 
 
@@ -37,8 +66,6 @@ def insert_users(firstname, lastname):
         INSERT INTO users (first_name, last_name)
         VALUES(?, ?)""", (firstname, lastname))
 
-
-def alter_users():
     # db_cursor.execute("""
     #     ALTER TABLE  users ADD COLUMN age INTEGER DEFAULT 10
     # """)
@@ -47,9 +74,20 @@ def alter_users():
     #
     # """)
 
+
+def update_users():
     db_cursor.execute("""
-        DROP TABLE orders
+        UPDATE users SET first_name = 'Jon', last_name = 'Doe' WHERE id=1
     """)
+
+
+def delete_users():
+    db_cursor.execute(
+        "DROP TABLE users"
+    )
+    # db_cursor.execute("""
+    #     DELETE FROM users WHERE id=1
+    # """)
 
 
 def insert_product(title, price):
@@ -64,15 +102,9 @@ def insert_orders(product_id, user_id):
             VALUES(?, ?)""", (product_id, user_id))
 
 
-def read_users():
-    db_cursor.execute("""
-        SELECT * FROM users
-    """)
-    return db_cursor
-
-
-db_connect.commit()
-
-alter_users()
-print(read_users().fetchall())
-db_connect.close()
+def get_all_products():
+    products = db_cursor.execute("""
+        SELECT * FROM product
+    """).fetchall()
+    db_cursor.close()
+    return products
