@@ -10,7 +10,7 @@ from aiogram.filters import CommandStart, Command
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 from keyboards_home import get_products_ikb, get_start_kb
 from home_commands import commands
-from states import ProductStateGroup
+from states_home import ProductStateGroup
 
 load_dotenv()
 TOKEN = os.getenv('BOT_TOKEN')

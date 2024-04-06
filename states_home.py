@@ -1,8 +1,7 @@
 from aiogram.fsm.state import StatesGroup, State
 
 
-class ProductStatesGroup(StatesGroup):
+class ProductStateGroup(StatesGroup):
     title = State()
     price = State()
     photo = State()
-

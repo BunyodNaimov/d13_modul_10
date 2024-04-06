@@ -90,10 +90,11 @@ def delete_users():
     # """)
 
 
-def insert_product(title, price):
+async def db_insert_product(title, price, photo_id):
     db_cursor.execute("""
-            INSERT INTO product (title, price)
-            VALUES(?, ?)""", (title, price))
+            INSERT INTO product (title, price, photo)
+            VALUES(?, ?, ?)""", (title, price, photo_id))
+    db_connect.commit()
 
 
 def insert_orders(product_id, user_id):
@@ -102,8 +103,9 @@ def insert_orders(product_id, user_id):
             VALUES(?, ?)""", (product_id, user_id))
 
 
-def get_all_products():
+def db_get_all_products():
     products = db_cursor.execute("""
         SELECT * FROM product
     """).fetchall()
     return products
+

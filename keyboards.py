@@ -1,10 +1,10 @@
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardMarkup, KeyboardButton
 
+ikb = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton(text="Mahsulotlarni ko'rish", callback_data='get_all_product')],
+    [InlineKeyboardButton(text="Mahsulot qo'shish", callback_data='add_product')]
+])
 
-def get_all_products_ikb():
-    ikb = InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text='Barcha mahsulotlar!',
-                              callback_data='get_all_products_ikb')]
-    ], resize_keyboard=True)
-
-    return ikb
+kb = ReplyKeyboardMarkup(keyboard=[
+    [KeyboardButton(text='/products')]
+], resize_keyboard=True)
