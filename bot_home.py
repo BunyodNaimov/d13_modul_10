@@ -7,7 +7,7 @@ import db_home
 from dotenv import load_dotenv
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import CommandStart, Command
-
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 from keyboards_home import get_products_ikb, get_start_kb
 from home_commands import commands
 from states import ProductStateGroup
@@ -19,10 +19,29 @@ bot = Bot(token=TOKEN)
 
 dp = Dispatcher()
 
+kb = ReplyKeyboardMarkup(keyboard=[
+    [KeyboardButton(text='send_contact', request_contact=True)]
+], resize_keyboard=True)
+
 
 @dp.message(CommandStart())
 async def start_cmd(message: types.Message):
     await message.answer("Salom, Do'konimizga xush kelibsiz! /help", reply_markup=get_start_kb())
+
+
+@dp.message(Command('contact'))
+async def send_contact(message: types.Message):
+    await message.answer('kontact yuboring', reply_markup=kb)
+
+
+@dp.message(F.contact)
+async def save_phone_number(message: types.Message):
+    phone = message.contact.phone_number
+    if message.contact.user_id == message.from_user.id:
+
+        await message.answer(f"{phone} to'gri kiritildi!")
+    else:
+        await message.answer('notogri')
 
 
 @dp.message(Command('products'))
@@ -37,9 +56,8 @@ async def cb_get_all_products(call: types.CallbackQuery):
     if not products:
         await call.message.answer("Mahsulotlar yo'q")
     for product in products:
-        print(products[0])
-        await call.message.answer_photo(photo=product.photo,
-                                        caption=f"{product.title}\n{product.price}")
+        await call.message.answer_photo(photo=product[-1],
+                                        caption=f"Nomi: {product[1]}\nNarxi:{product[2]}")
 
 
 @dp.callback_query(F.data == 'create_product')
