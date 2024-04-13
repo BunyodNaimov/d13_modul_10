@@ -7,15 +7,17 @@ db_cursor = db_connect.cursor()
 
 def create_users():
     db_cursor.execute("""
-        CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, first_name TEXT, last_name TEXT)
+        CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY, full_name TEXT, phone TEXT, telegram_id INTEGER
+        )
     """)
     db_connect.commit()
 
 
-def insert_users():
+async def insert_user(full_name, phone, telegram_id):
     db_cursor.execute("""
-        INSERT INTO users(last_name, first_name) VALUES ('Jon', 'Doe')
-    """)
+        INSERT INTO users (full_name, phone, telegram_id)
+        VALUES(?, ?, ?)""", (full_name, phone, telegram_id))
     db_connect.commit()
 
 
@@ -31,9 +33,6 @@ def update_users():
         UPDATE users SET last_name='DOE', first_name='JON' WHERE id=2
     """)
     db_connect.commit()
-
-
-update_users()
 
 
 def drop_users():
@@ -59,20 +58,6 @@ def create_table_orders():
         product_id INTEGER,
         user_id INTEGER)
     """)
-
-
-def insert_users(firstname, lastname):
-    db_cursor.execute("""
-        INSERT INTO users (first_name, last_name)
-        VALUES(?, ?)""", (firstname, lastname))
-
-    # db_cursor.execute("""
-    #     ALTER TABLE  users ADD COLUMN age INTEGER DEFAULT 10
-    # """)
-    # db_cursor.execute("""
-    #     ALTER TABLE users RENAME yosh to age
-    #
-    # """)
 
 
 def update_users():
@@ -108,4 +93,3 @@ def db_get_all_products():
         SELECT * FROM product
     """).fetchall()
     return products
-

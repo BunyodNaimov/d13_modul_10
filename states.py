@@ -6,3 +6,7 @@ class ProductStatesGroup(StatesGroup):
     price = State()
     photo = State()
 
+
+class UserRegisterStatesGroup(StatesGroup):
+    full_name = State()
+    phone = State()

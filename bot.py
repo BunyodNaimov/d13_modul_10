@@ -5,9 +5,10 @@ from aiogram.filters import CommandStart, Command
 from aiogram.fsm.context import FSMContext
 from dotenv import load_dotenv
 
-from db import db_get_all_products, db_insert_product
-from keyboards import kb, ikb
-from states import ProductStatesGroup
+from commands import commands
+from db import db_get_all_products, db_insert_product, create_users, insert_user
+from keyboards import kb, ikb, buy_ikb
+from states import ProductStatesGroup, UserRegisterStatesGroup
 
 load_dotenv()
 BOT_TOKEN = os.getenv('BOT_TOKEN')
@@ -18,12 +19,34 @@ dp = Dispatcher()
 
 @dp.message(CommandStart())
 async def cmd_start(message: types.Message):
-    await message.answer("Assalomu Aleykum!\n Do'konimizga xush kelibsiz!", reply_markup=kb)
+    await message.answer("Assalomu Aleykum!\n Do'konimizga xush kelibsiz!\n"
+                         "Iltimos ro'yxatdan o'ting /registration", reply_markup=kb)
 
 
 @dp.message(Command('products'))
 async def cmd_products(message: types.Message):
     await message.answer("Mahsulotlarni boshqarish!", reply_markup=ikb)
+
+
+@dp.message(Command('registration'))
+async def cmd_registration(message: types.Message, state: FSMContext):
+    await state.set_state(UserRegisterStatesGroup.full_name)
+    await message.answer("Ism Familiya kiriting: ")
+
+
+@dp.message(UserRegisterStatesGroup.full_name)
+async def user_fullname(message: types.Message, state: FSMContext):
+    await state.update_data(full_name=message.text)
+    await state.set_state(UserRegisterStatesGroup.phone)
+    await message.answer("Telefon raqamingizni yuboring: ")
+
+
+@dp.message(UserRegisterStatesGroup.phone)
+async def user_phone(message: types.Message, state: FSMContext):
+    await state.update_data(phone=message.text)
+    data = await state.get_data()
+    await insert_user(data["full_name"], data['phone'], message.from_user.id)
+    await message.answer("Ro'yxatdan o'tdingiz! ")
 
 
 @dp.callback_query(F.data == 'get_all_product')
@@ -33,10 +56,10 @@ async def get_all_product(call: types.CallbackQuery):
     if not product:
         await call.message.answer("Mahsulot mavjud emas!")
     for product in product:
-        print(product)
         await call.message.answer_photo(photo=product[3],
                                         caption=f"Mahsulot nomi: {product[1]}\n"
-                                                f"Mahsulot narxi: {product[2]}\n")
+                                                f"Mahsulot narxi: {product[2]}\n",
+                                        reply_markup=buy_ikb)
 
 
 @dp.callback_query(F.data == 'add_product')
@@ -68,6 +91,7 @@ async def create_product_photo(message: types.Message, state: FSMContext):
 
 
 async def main():
+    await bot.set_my_commands(commands=commands)
     await dp.start_polling(bot)
 
 

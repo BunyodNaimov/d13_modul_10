@@ -8,3 +8,10 @@ ikb = InlineKeyboardMarkup(inline_keyboard=[
 kb = ReplyKeyboardMarkup(keyboard=[
     [KeyboardButton(text='/products')]
 ], resize_keyboard=True)
+
+buy_ikb = InlineKeyboardMarkup(
+    inline_keyboard=[
+        [InlineKeyboardButton(text='🛒', callback_data='savatchaga'),
+         InlineKeyboardButton(text='❤', callback_data='sevimlilar')]
+
+    ])
