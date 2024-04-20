@@ -21,26 +21,6 @@ async def insert_user(full_name, phone, telegram_id):
     db_connect.commit()
 
 
-def delete_users():
-    db_cursor.execute("""
-        DELETE FROM users WHERE  id=1
-    """)
-    db_connect.commit()
-
-
-def update_users():
-    db_cursor.execute("""
-        UPDATE users SET last_name='DOE', first_name='JON' WHERE id=2
-    """)
-    db_connect.commit()
-
-
-def drop_users():
-    db_cursor.execute("""
-        DROP TABLE users
-    """)
-
-
 def create_table_product():
     db_cursor.execute("""
         CREATE TABLE IF NOT EXISTS product(
@@ -49,6 +29,20 @@ def create_table_product():
         price REAL,
         photo TEXT)
     """)
+
+
+async def db_insert_product(title, price, photo_id):
+    db_cursor.execute("""
+            INSERT INTO product (title, price, photo)
+            VALUES(?, ?, ?)""", (title, price, photo_id))
+    db_connect.commit()
+
+
+async def db_get_all_products():
+    products = db_cursor.execute("""
+        SELECT * FROM product
+    """).fetchall()
+    return products
 
 
 def create_table_orders():
@@ -60,28 +54,11 @@ def create_table_orders():
     """)
 
 
-create_table_orders()
-
-
-async def db_insert_product(title, price, photo_id):
-    db_cursor.execute("""
-            INSERT INTO product (title, price, photo)
-            VALUES(?, ?, ?)""", (title, price, photo_id))
-    db_connect.commit()
-
-
 async def insert_orders(product_id, user_id):
     db_cursor.execute("""
             INSERT INTO orders (product_id, user_id)
             VALUES(?, ?)""", (product_id, user_id))
     db_connect.commit()
-
-
-def db_get_all_products():
-    products = db_cursor.execute("""
-        SELECT * FROM product
-    """).fetchall()
-    return products
 
 
 async def db_get_all_orders(user_id):
@@ -101,3 +78,39 @@ async def db_get_all_orders(user_id):
         SELECT * FROM users WHERE telegram_id=?
     """, (user_id,)).fetchone()
     return user, products
+
+
+def db_create_favorites():
+    db_cursor.execute("""
+        CREATE TABLE IF NOT EXISTS favorites(
+        id INTEGER PRIMARY KEY,
+        user_id INTEGER,
+        product_id INTEGER)
+    """)
+    db_connect.commit()
+
+
+async def db_insert_favorites(user_id, product_id):
+    db_cursor.execute("""
+        INSERT INTO favorites(user_id, product_id) VALUES(?, ?)
+    """, (user_id, product_id))
+    db_connect.commit()
+
+
+async def db_get_all_favorites(user_id):
+    favorites = db_cursor.execute("""
+        SELECT * FROM favorites WHERE user_id=?
+    """, (user_id,)).fetchall()
+
+    products = []
+    if not favorites:
+        return products
+
+    for favorite in favorites:
+        product = db_cursor.execute("""
+            SELECT * FROM product WHERE product.id=?
+        """, (favorite[2],)).fetchone()
+        products.append(product)
+
+    return products
+

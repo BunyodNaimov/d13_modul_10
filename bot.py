@@ -6,16 +6,20 @@ from aiogram.fsm.context import FSMContext
 from dotenv import load_dotenv
 
 from commands import commands
-from db import db_get_all_products, db_insert_product, insert_user, insert_orders, db_get_all_orders
+from db import db_get_all_products, db_insert_product, insert_user, insert_orders, db_get_all_orders, \
+    db_get_all_favorites, db_insert_favorites
 from keyboards import kb, ikb, buy_ikb
 from states import ProductStatesGroup, UserRegisterStatesGroup
-from aiogram.client.session.aiohttp import AiohttpSession
+
+# from aiogram.client.session.aiohttp import AiohttpSession
 
 load_dotenv()
 BOT_TOKEN = os.getenv('BOT_TOKEN')
 
-session = AiohttpSession(proxy="http://proxy.server:3128")
-bot = Bot(token=BOT_TOKEN, session=session)
+# session = AiohttpSession(proxy="http://proxy.server:3128")
+# bot = Bot(token=BOT_TOKEN, session=session)
+
+bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 
 
@@ -46,6 +50,18 @@ async def cmd_orders(message: types.Message):
                                   f"Nomi: {product[1]}")
 
 
+@dp.message(Command('favorites'))
+async def cmd_favorites(message: types.Message):
+    user_id = message.from_user.id
+    products = await db_get_all_favorites(user_id)
+    if not products:
+        await message.answer(text='Not favorites')
+    for product in products:
+        await message.answer(text=f"{message.from_user.full_name}\n"
+                                  f"Zakazlaringiz\n"
+                                  f"Nomi: {product[1]}")
+
+
 @dp.message(UserRegisterStatesGroup.full_name)
 async def user_fullname(message: types.Message, state: FSMContext):
     await state.update_data(full_name=message.text)
@@ -61,6 +77,14 @@ async def user_phone(message: types.Message, state: FSMContext):
     await message.answer("Ro'yxatdan o'tdingiz! ")
 
 
+@dp.callback_query(F.data == 'sevimlilar')
+async def sevimlilar(callback: types.CallbackQuery):
+    user_id = callback.from_user.id
+    product_id = callback.message.caption.split('id:')[-1]
+    await db_insert_favorites(user_id, int(product_id))
+    await callback.message.answer(text="Sevimlilarga qo'shildi!")
+
+
 @dp.callback_query(F.data == 'savatchaga')
 async def savatchaga(call: types.CallbackQuery):
     product_id = int(call.message.caption.split('id:')[-1])
@@ -71,7 +95,7 @@ async def savatchaga(call: types.CallbackQuery):
 
 @dp.callback_query(F.data == 'get_all_product')
 async def get_all_product(call: types.CallbackQuery):
-    product = db_get_all_products()
+    product = await db_get_all_products()
     await call.message.delete()
     if not product:
         await call.message.answer("Mahsulot mavjud emas!")

@@ -10,3 +10,5 @@ class ProductStatesGroup(StatesGroup):
 class UserRegisterStatesGroup(StatesGroup):
     full_name = State()
     phone = State()
+
+
