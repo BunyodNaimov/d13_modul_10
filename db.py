@@ -8,10 +8,17 @@ db_cursor = db_connect.cursor()
 def create_users():
     db_cursor.execute("""
         CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY, full_name TEXT, phone TEXT, telegram_id INTEGER
+        id INTEGER PRIMARY KEY, full_name TEXT, phone TEXT, telegram_id INTEGER, is_admin BOOLEAN DEFAULT 0
         )
     """)
     db_connect.commit()
+
+
+async def db_get_user(user_id):
+    user = db_cursor.execute("""
+        SELECT * FROM users WHERE telegram_id = ?
+    """, (user_id,)).fetchone()
+    return user
 
 
 async def insert_user(full_name, phone, telegram_id):
@@ -54,11 +61,19 @@ def create_table_orders():
     """)
 
 
-async def insert_orders(product_id, user_id):
-    db_cursor.execute("""
+async def db_insert_orders(product_id, user_id):
+    product = db_cursor.execute("""
+        SELECT * FROM orders WHERE user_id = ? AND product_id = ?
+    """, (user_id, product_id)).fetchone()
+
+    if product is not None:
+        return "Mahsulot savatchaga qo'shilgan!"
+    else:
+        db_cursor.execute("""
             INSERT INTO orders (product_id, user_id)
             VALUES(?, ?)""", (product_id, user_id))
-    db_connect.commit()
+        db_connect.commit()
+        return "Mahsulot savatchaga joylandi!"
 
 
 async def db_get_all_orders(user_id):
@@ -113,4 +128,3 @@ async def db_get_all_favorites(user_id):
         products.append(product)
 
     return products
-
