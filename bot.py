@@ -22,6 +22,7 @@ BOT_TOKEN = os.getenv('BOT_TOKEN')
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 
+
 @dp.message(CommandStart())
 async def cmd_start(message: types.Message):
     await message.answer("Assalomu Aleykum!\n Do'konimizga xush kelibsiz!\n"
