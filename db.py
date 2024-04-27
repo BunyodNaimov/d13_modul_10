@@ -95,6 +95,13 @@ async def db_get_all_orders(user_id):
     return user, products
 
 
+async def db_delete_order(product_id):
+    db_cursor.execute("""
+        DELETE FROM orders WHERE product_id=?
+    """, (product_id,))
+    db_connect.commit()
+
+
 def db_create_favorites():
     db_cursor.execute("""
         CREATE TABLE IF NOT EXISTS favorites(
@@ -106,10 +113,18 @@ def db_create_favorites():
 
 
 async def db_insert_favorites(user_id, product_id):
-    db_cursor.execute("""
-        INSERT INTO favorites(user_id, product_id) VALUES(?, ?)
-    """, (user_id, product_id))
-    db_connect.commit()
+    product = db_cursor.execute("""
+            SELECT * FROM favorites WHERE user_id = ? AND product_id = ?
+        """, (user_id, product_id)).fetchone()
+
+    if product is not None:
+        return "Mahsulot sevimlilarga qo'shilgan!"
+    else:
+        db_cursor.execute("""
+                INSERT INTO favorites (product_id, user_id)
+                VALUES(?, ?)""", (product_id, user_id))
+        db_connect.commit()
+        return "Mahsulot sevimlilarga joylandi!"
 
 
 async def db_get_all_favorites(user_id):
@@ -128,3 +143,10 @@ async def db_get_all_favorites(user_id):
         products.append(product)
 
     return products
+
+
+async def db_delete_favorite(product_id):
+    db_cursor.execute("""
+        DELETE FROM favorites WHERE product_id=?
+    """, (product_id,))
+    db_connect.commit()

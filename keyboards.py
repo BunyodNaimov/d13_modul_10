@@ -19,3 +19,12 @@ buy_ikb = InlineKeyboardMarkup(
          InlineKeyboardButton(text='❤', callback_data='sevimlilar')]
 
     ])
+
+delete_order_ikb = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton(text='🚮', callback_data='delete_order')],
+], resize_keyboard=True)
+
+delete_favorites_ikb = InlineKeyboardMarkup(inline_keyboard=[
+    [InlineKeyboardButton(text='🛒', callback_data='savatchaga'),
+     InlineKeyboardButton(text='🚮', callback_data='delete_favorite')],
+], resize_keyboard=True)
